@@ -1,0 +1,111 @@
+import turtle
+import math
+import random
+
+# --- Configuration ---
+WIDTH, HEIGHT = 800, 600
+BG_COLOR = "#0f172a"    # dark background
+SPEED = 0               # 0 = fastest animation, higher = slower
+NUM_PETALS = 12
+PETAL_LENGTH = 160
+SPIRAL_TURNS = 120
+
+# --- Setup screen & turtle ---
+screen = turtle.Screen()
+screen.setup(WIDTH, HEIGHT)
+screen.title("Turtle Flower + Spiral")
+screen.bgcolor(BG_COLOR)
+
+t = turtle.Turtle()
+t.hideturtle()
+t.speed(SPEED)
+t.width(2)
+
+# Utility: pick a nice random pastel color
+def pastel():
+    r = random.randint(100, 255)
+    g = random.randint(100, 255)
+    b = random.randint(100, 255)
+    return f'#{r:02x}{g:02x}{b:02x}'
+
+# Draw a single petal using circle arcs
+def draw_petal(turtle_obj, radius, angle):
+    turtle_obj.circle(radius, angle)
+    turtle_obj.left(180 - angle)
+    turtle_obj.circle(radius, angle)
+    turtle_obj.left(180 - (360 / NUM_PETALS))  # small nudge for symmetry
+
+# Draw flower at center
+def draw_flower():
+    t.penup()
+    t.goto(0, -PETAL_LENGTH // 3)
+    t.setheading(0)
+    t.pendown()
+    petal_color = pastel()
+    t.fillcolor(petal_color)
+    t.pencolor(petal_color)
+
+    # Outer petals
+    t.begin_fill()
+    for _ in range(NUM_PETALS):
+        draw_petal(t, PETAL_LENGTH, 60)
+    t.end_fill()
+
+    # Center disk
+    t.penup()
+    t.goto(0, -30)
+    t.pendown()
+    center_color = "#ffd166"
+    t.fillcolor(center_color)
+    t.pencolor(center_color)
+    t.begin_fill()
+    t.circle(40)
+    t.end_fill()
+
+# Draw a colorful logarithmic spiral behind flower
+def draw_spiral():
+    t.penup()
+    t.goto(0, 0)
+    t.setheading(0)
+    t.pendown()
+    t.width(2)
+    steps = SPIRAL_TURNS * 4
+    a = 0.2
+    b = 0.15
+    t.pencolor("#9be7ff")
+    for i in range(steps):
+        theta = 0.1 * i
+        r = a * math.exp(b * theta)
+        x = r * math.cos(theta) * 40  # scale up visually
+        y = r * math.sin(theta) * 40
+        # change color gradually
+        if i % 6 == 0:
+            t.pencolor(pastel())
+        t.goto(x, y)
+
+# Animated petals that rotate slightly (extra effect)
+def animated_petal_ring():
+    saved_speed = t.speed()
+    t.speed(1)
+    for i in range(18):
+        t.right(20)
+        draw_flower()
+    t.speed(saved_speed)
+
+# Main: draw spiral first (so flower sits on top), then flower
+def main():
+    t.clear()
+    t.penup()
+    t.goto(0, 0)
+    t.pendown()
+    draw_spiral()
+    draw_flower()
+
+    # optional: uncomment the next line to run a longer animated sequence
+    # animated_petal_ring()
+
+    # keep window open until closed by user
+    screen.mainloop()
+
+if __name__ == "__main__":
+    main()
